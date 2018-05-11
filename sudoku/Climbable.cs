@@ -8,7 +8,7 @@ namespace sudoku
 {
     interface Climbable
     {
-        IEnumerable<Climbable> Neighbors();
+        IEnumerable<Climbable> Neighbours();
         void RandomWalk(int iterations);
         int HeuristicValue();
     }

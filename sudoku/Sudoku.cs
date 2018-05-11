@@ -4,102 +4,88 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace sudoku
-{
-    class Sudoku : Climbable
-    {
-        public struct Block
-        {
-            public int xMin, yMin, xMax, yMax;
-            public Block(int xMin, int yMin, int xMax, int yMax)
-            {
-                this.xMin = xMin; this.xMax = xMax; this.yMin = yMin; this.yMax = yMax;
-            }
-        }
+namespace sudoku {
+    class Sudoku : Climbable {
 
+        int heuristic;
         public int[,] puzzle;
+        public bool[,] unswappable;
         private int n, blockSize;
         private Random random = new Random();
 
-        public Sudoku(int n)
-        {
+        public Sudoku(int n) {
             this.n = n;
             puzzle = new int[n, n];
+            unswappable = new bool[n, n];
             blockSize = (int)Math.Sqrt(n);
         }
 
-        public IEnumerable<Climbable> Neighbours()
-        {
-            Block block = RandomBlock();
-            for (int x1 = block.xMin; x1 <= block.xMax; x1++)
-            {
-                for (int y1 = block.yMin; y1 <= block.yMax; y1++)
-                {
-                    for (int x2 = block.xMin; x2 <= block.xMax; x1++)
-                    {
-                        for (int y2 = block.yMin; y2 <= block.yMax; y1++)
-                        {
-                            Swap(x1, y1, x2, y2);
+        public IEnumerable<Climbable> Neighbours() {
+            int block = random.Next(n);
+            for (int i = 1; i < n; i++) {
+                if (!unswappable[block, i]) {
+                    for (int j = 0; j < i; j++) {
+                        if (!unswappable[block, j]) {
+                            Swap(block, i, j);
                             yield return this;
-                            Swap(x1, y1, x2, y2);
+                            Swap(block, i, j);
                         }
                     }
                 }
             }
         }
 
-        public int HeuristicValue()
-        {
+        public int HeuristicValue() {
             return 0;
         }
 
-        public void RandomWalk(int iterations)
-        {
-            for (int i = 0; i < iterations; i++)
-                RandomSwap(RandomBlock());
+        public void RandomWalk(int iterations) {
+            for (int i = 0; i < iterations; i++) {
+                int j = random.Next(n);
+                Swap(random.Next(n), j, (random.Next(n - 1) + 1 + j) % n);
+            }
         }
 
-        private void Swap(int x1, int y1, int x2, int y2)
-        {
-            int first = puzzle[x1, y1];
-            puzzle[x1, y1] = puzzle[x2, y2];
-            puzzle[x2, y2] = first;
+        private void Swap(int block, int i, int j) {
+            int first = puzzle[block, i];
+            puzzle[block, i] = puzzle[block, j];
+            puzzle[block, j] = first;
         }
 
-        private void fillRandom()
-        {
-
+        public void FillRandom() {
+            for(int block = 0; block < n; block++) {
+                List<int> missing = Enumerable.Range(1, n).ToList();
+                for(int elem = 0; elem < n; elem++) {
+                    if(puzzle[block, elem] != 0) {
+                        unswappable[block, elem] = true;
+                        missing.Remove(puzzle[block, elem]);
+                    }
+                }
+                for (int elem = 0; elem < n; elem++) {
+                    if (puzzle[block, elem] == 0) {
+                        int r = missing[random.Next(missing.Count)];
+                        puzzle[block, elem] = r;
+                        missing.Remove(r);
+                    }
+                }
+            }
         }
 
-        public Block RandomBlock()
-        {
-            int xMin = random.Next(0, 3) * 3;
-            int yMin = random.Next(0, 3) * 3;
-            return new Block(xMin, xMin + blockSize - 1, yMin, yMin + blockSize - 1);
-        }
-
-        public void RandomSwap(Block block)
-        {
-            int x1, y1, x2, y2;
-            x1 = random.Next(block.xMin, block.xMax);
-            y1 = random.Next(block.yMin, block.yMax);
-            do
-            {
-                x2 = random.Next(block.xMin, block.xMax);
-                y2 = random.Next(block.yMin, block.yMax);
-            } while (x1 == x2 && y1 == y2);
-            Swap(x1, y1, x2, y2);
-        }
-
-        public void Print()
-        {
-            for (int i = 0; i < n; i++)
-            {
-                for (int j = 0; j < n; j++)
-                {
-                    Console.Write(puzzle[i, j] + " ");
+        public void Print() {
+            String space = " ";
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    if (j == 2 || j == 5) {
+                        space = "|";
+                    } else {
+                        space = " ";
+                    }
+                    Console.Write(puzzle[(blockSize * (i / blockSize) + (j / blockSize)), (blockSize * (i % blockSize) + (j % blockSize))] + space);
                 }
                 Console.Write("\r\n");
+                if (i == 2 || i == 5) {
+                    Console.WriteLine("-----+-----+-----");
+                }
             }
         }
     }

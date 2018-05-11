@@ -22,7 +22,7 @@ namespace sudoku
             int bestHeuristic = puzzle.HeuristicValue();
             while (!inLocalOptimum)
             {
-                foreach (Climbable neighbour in puzzle.Neighbors())
+                foreach (Climbable neighbour in puzzle.Neighbours())
                 {
                     int neighbourHeuristic = neighbour.HeuristicValue();
                     if (neighbourHeuristic < bestHeuristic)

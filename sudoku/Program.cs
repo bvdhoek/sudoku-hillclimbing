@@ -7,17 +7,23 @@ namespace sudoku
     {
         static void Main(string[] args)
         {
-            int lines = int.Parse(Console.ReadLine());
-            Sudoku sudoku = new Sudoku(lines);
-            for (int i = 0; i < lines; i++)
+            int n = int.Parse(Console.ReadLine());
+            Sudoku sudoku = new Sudoku(n);
+            int blockSize = (int)Math.Sqrt(n);
+            for (int i = 0; i < n; i++)
             {
                 string[] numbers = Console.ReadLine().Split();
-                for (int j = 0; j < lines; j++)
+                for (int j = 0; j < n; j++)
                 {
-                    sudoku.puzzle[i, j] = int.Parse(numbers[j]);
+                    int block = blockSize * (i / blockSize) + (j / blockSize);
+                    int elem = blockSize * (i % blockSize) + (j % blockSize);
+                    sudoku.puzzle[block, elem] = int.Parse(numbers[j]);
                 }
             }
-            sudoku.RandomWalk(30);
+            sudoku.FillRandom();
+            sudoku.Print();
+            //sudoku.RandomWalk(30);
+            Console.ReadLine();
         }
     }
 }
