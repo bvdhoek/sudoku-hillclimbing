@@ -15,9 +15,9 @@ namespace sudoku
                 string[] numbers = Console.ReadLine().Split();
                 for (int j = 0; j < n; j++)
                 {
-                    int block = blockSize * (i / blockSize) + (j / blockSize);
-                    int elem = blockSize * (i % blockSize) + (j % blockSize);
-                    sudoku.puzzle[block, elem] = int.Parse(numbers[j]);
+                    //int block = blockSize * (i / blockSize) + (j / blockSize);
+                    //int elem = blockSize * (i % blockSize) + (j % blockSize);
+                    sudoku.puzzle[i, j] = int.Parse(numbers[j]);
                 }
             }
             sudoku.FillRandom();
