@@ -8,32 +8,28 @@ namespace sudoku
 {
     class HillClimber
     {
-        public Climbable puzzle;
-        bool inLocalOptimum = false;
+        public Sudoku puzzle;
+        public int bestHeuristic = 1000;
+        public int neighboursSearched = 0;
 
-        public HillClimber(Climbable puzzle)
+        public HillClimber(Sudoku puzzle)
         {
             this.puzzle = puzzle;
         }
 
         public void Climb()
         {
-            Climbable bestSolution = puzzle;
+            puzzle.isLocalOptimum = false;
+            Sudoku bestSolution = puzzle;
             int bestHeuristic = puzzle.HeuristicValue();
-            while (!inLocalOptimum)
+            puzzle.RandomWalk(5);
+            while (!puzzle.InLocalOptimum())
             {
-                foreach (Climbable neighbour in puzzle.Neighbours())
-                {
-                    int neighbourHeuristic = neighbour.HeuristicValue();
-                    if (neighbourHeuristic < bestHeuristic)
-                    {
-                        bestHeuristic = neighbourHeuristic;
-                        bestSolution = neighbour.Copy();
-                    }
-                }
-                inLocalOptimum = bestSolution == puzzle;
+                bestSolution = puzzle.BestNeighbour();
+                neighboursSearched++;
                 puzzle = bestSolution;
             }
+            this.bestHeuristic = Math.Min(this.bestHeuristic, puzzle.HeuristicValue());
         }
     }
 }

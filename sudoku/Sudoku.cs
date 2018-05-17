@@ -5,13 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace sudoku {
-    class Sudoku : Climbable {
-
+    class Sudoku {
         int totalHeuristic;
         int[] rowHeuristic, columnHeuristic;
         public int[,] puzzle;       //(Row, Column) based
         public bool[,] unswappable; //(Block, Elem) based
         private int n, blockSize;
+        public bool isLocalOptimum = false;
         private Random random = new Random();
 
         public Sudoku(int n) {
@@ -23,7 +23,7 @@ namespace sudoku {
             blockSize = (int)Math.Sqrt(n);
         }
 
-        public Climbable Copy() {
+        public Sudoku Copy() {
             Sudoku copy = new Sudoku(n);
             copy.totalHeuristic = totalHeuristic;
             copy.rowHeuristic = rowHeuristic.Clone() as int[];
@@ -33,26 +33,45 @@ namespace sudoku {
             return copy;
         }
 
-        public IEnumerable<Climbable> Neighbours() {
+        public Sudoku BestNeighbour() {
             int block = random.Next(n);
+            int bestHeuristic = this.totalHeuristic;
+            Swap bestSwap = null;
             for (int elem1 = 1; elem1 < n; elem1++) {
                 if (!unswappable[block, elem1]) {
                     for (int elem2 = 0; elem2 < elem1; elem2++) {
                         if (!unswappable[block, elem2]) {
                             Swap(block, elem1, elem2);
-                            yield return this;
+                            if (this.totalHeuristic < bestHeuristic) bestSwap = new Swap(elem1, elem2);
                             Swap(block, elem1, elem2);
                         }
                     }
                 }
             }
+            if (bestSwap == null)
+            {
+                Console.WriteLine("In local optimum");
+                isLocalOptimum = true;
+                return this;
+            } else
+            {
+                Console.WriteLine("Swapping {0}, {1}, {2}", block, bestSwap.elem1, bestSwap.elem2);
+                Swap(block, bestSwap.elem1, bestSwap.elem2);
+                return Copy();
+            }
+        }
+
+        public bool InLocalOptimum()
+        {
+            return this.isLocalOptimum;
         }
 
         public int HeuristicValue() {
             return totalHeuristic;
         }
 
-        public void RandomWalk(int iterations) {
+        public void RandomWalk(int iterations)
+        {
             for (int i = 0; i < iterations; i++) {
                 int j = random.Next(n);
                 Swap(random.Next(n), j, (random.Next(n - 1) + 1 + j) % n);
@@ -105,8 +124,8 @@ namespace sudoku {
                         missing.Remove(puzzle[x, j2]);
                     }
                 }
-                totalHeuristic += missing.Count - columnHeuristic[i2];
-                columnHeuristic[i2] = missing.Count;
+                totalHeuristic += missing.Count - columnHeuristic[j2];
+                columnHeuristic[j2] = missing.Count;
             }
         }
 
@@ -152,19 +171,27 @@ namespace sudoku {
         }
 
         public void Print() {
+            Console.WriteLine(this.totalHeuristic);
             String space = " ";
-            for (int i = 0; i < n; i++) {
-                for (int j = 0; j < n; j++) {
-                    if ((j + 1) % blockSize == 0 && j != n - 1) {
+            for (int i = 0; i < n; i++)
+            {
+                for (int j = 0; j < n; j++)
+                {
+                    if ((j + 1) % blockSize == 0 && j != n - 1)
+                    {
                         space = "|";
-                    } else {
+                    }
+                    else
+                    {
                         space = " ";
                     }
                     Console.Write(puzzle[i, j] + space);
                 }
                 Console.Write("\r\n");
-                if ((i + 1) % blockSize == 0 && i != n - 1) {
-                    for (int j = 1; j < blockSize; ++j) {
+                if ((i + 1) % blockSize == 0 && i != n - 1)
+                {
+                    for (int j = 1; j < blockSize; ++j)
+                    {
                         Console.Write(new string('-', 2 * blockSize - 1) + "+");
                     }
                     Console.Write(new string('-', 2 * blockSize - 1) + "\n");

@@ -26,14 +26,14 @@ namespace sudoku
             Console.WriteLine(sudoku.HeuristicValue());
 
             HillClimber climber = new HillClimber(sudoku);
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 10000000; i++)
             {
                 climber.Climb();
-                Console.WriteLine(climber.puzzle.HeuristicValue());
+                if (climber.bestHeuristic == 0) break;
+                Console.WriteLine(climber.bestHeuristic);
             }
-            
-            sudoku.Print();
-            Console.WriteLine(climber.puzzle.HeuristicValue());
+            climber.puzzle.Print();
+            Console.WriteLine("neighbours searched {0}", climber.neighboursSearched);
 
             Console.ReadLine();
         }
