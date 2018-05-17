@@ -23,6 +23,16 @@ namespace sudoku {
             blockSize = (int)Math.Sqrt(n);
         }
 
+        public Sudoku Copy() {
+            Sudoku copy = new Sudoku(n);
+            copy.totalHeuristic = totalHeuristic;
+            copy.rowHeuristic = rowHeuristic.Clone() as int[];
+            copy.columnHeuristic = columnHeuristic.Clone() as int[];
+            copy.puzzle = puzzle.Clone() as int[,];
+            copy.unswappable = unswappable.Clone() as bool[,];
+            return copy;
+        }
+
         public IEnumerable<Climbable> Neighbours() {
             int block = random.Next(n);
             for (int elem1 = 1; elem1 < n; elem1++) {
@@ -145,7 +155,7 @@ namespace sudoku {
             String space = " ";
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++) {
-                    if (j == 2 || j == 5) {
+                    if ((j + 1) % blockSize == 0 && j != n - 1) {
                         space = "|";
                     } else {
                         space = " ";
@@ -153,8 +163,11 @@ namespace sudoku {
                     Console.Write(puzzle[i, j] + space);
                 }
                 Console.Write("\r\n");
-                if (i == 2 || i == 5) {
-                    Console.WriteLine("-----+-----+-----");
+                if ((i + 1) % blockSize == 0 && i != n - 1) {
+                    for (int j = 1; j < blockSize; ++j) {
+                        Console.Write(new string('-', 2 * blockSize - 1) + "+");
+                    }
+                    Console.Write(new string('-', 2 * blockSize - 1) + "\n");
                 }
             }
         }
