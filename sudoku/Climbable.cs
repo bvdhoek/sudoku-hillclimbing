@@ -11,5 +11,6 @@ namespace sudoku
         IEnumerable<Climbable> Neighbours();
         void RandomWalk(int iterations);
         int HeuristicValue();
+        Climbable Copy();
     }
 }

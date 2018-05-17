@@ -23,7 +23,7 @@ namespace sudoku {
             blockSize = (int)Math.Sqrt(n);
         }
 
-        public Sudoku Copy() {
+        public Climbable Copy() {
             Sudoku copy = new Sudoku(n);
             copy.totalHeuristic = totalHeuristic;
             copy.rowHeuristic = rowHeuristic.Clone() as int[];

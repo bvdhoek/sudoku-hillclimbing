@@ -22,7 +22,19 @@ namespace sudoku
             }
             sudoku.FillRandom();
             sudoku.Print();
-            //sudoku.RandomWalk(30);
+
+            Console.WriteLine(sudoku.HeuristicValue());
+
+            HillClimber climber = new HillClimber(sudoku);
+            for (int i = 0; i < 10; i++)
+            {
+                climber.Climb();
+                Console.WriteLine(climber.puzzle.HeuristicValue());
+            }
+            
+            sudoku.Print();
+            Console.WriteLine(climber.puzzle.HeuristicValue());
+
             Console.ReadLine();
         }
     }

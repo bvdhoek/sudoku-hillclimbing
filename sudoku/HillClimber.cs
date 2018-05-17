@@ -8,7 +8,7 @@ namespace sudoku
 {
     class HillClimber
     {
-        Climbable puzzle;
+        public Climbable puzzle;
         bool inLocalOptimum = false;
 
         public HillClimber(Climbable puzzle)
@@ -28,7 +28,7 @@ namespace sudoku
                     if (neighbourHeuristic < bestHeuristic)
                     {
                         bestHeuristic = neighbourHeuristic;
-                        bestSolution = neighbour;
+                        bestSolution = neighbour.Copy();
                     }
                 }
                 inLocalOptimum = bestSolution == puzzle;
