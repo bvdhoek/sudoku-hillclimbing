@@ -21,20 +21,17 @@ namespace sudoku
                 }
             }
             sudoku.FillRandom();
-            sudoku.Print();
-
-            Console.WriteLine(sudoku.HeuristicValue());
 
             HillClimber climber = new HillClimber(sudoku);
-            for (int i = 0; i < 10000000; i++)
+            Console.WriteLine("Calculating solution");
+            while (true)
             {
                 climber.Climb();
                 if (climber.bestHeuristic == 0) break;
-                Console.WriteLine(climber.bestHeuristic);
             }
-            climber.puzzle.Print();
-            Console.WriteLine("neighbours searched {0}", climber.neighboursSearched);
+            Console.WriteLine("Calculated solution");
 
+            climber.puzzle.Print();
             Console.ReadLine();
         }
     }

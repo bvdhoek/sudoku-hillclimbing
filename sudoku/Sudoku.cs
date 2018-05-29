@@ -50,12 +50,10 @@ namespace sudoku {
             }
             if (bestSwap == null)
             {
-                Console.WriteLine("In local optimum");
                 isLocalOptimum = true;
                 return this;
             } else
             {
-                Console.WriteLine("Swapping {0}, {1}, {2}", block, bestSwap.elem1, bestSwap.elem2);
                 Swap(block, bestSwap.elem1, bestSwap.elem2);
                 return Copy();
             }
