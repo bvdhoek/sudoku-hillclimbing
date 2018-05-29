@@ -1,6 +1,0 @@
-C:\Users\bernd\src\u\Computationele intelligentie\sudoku\sudoku\bin\Release\sudoku.exe.config
-C:\Users\bernd\src\u\Computationele intelligentie\sudoku\sudoku\bin\Release\sudoku.exe
-C:\Users\bernd\src\u\Computationele intelligentie\sudoku\sudoku\bin\Release\sudoku.pdb
-C:\Users\bernd\src\u\Computationele intelligentie\sudoku\sudoku\obj\Release\sudoku.exe
-C:\Users\bernd\src\u\Computationele intelligentie\sudoku\sudoku\obj\Release\sudoku.pdb
-C:\Users\bernd\src\u\Computationele intelligentie\sudoku\sudoku\obj\Release\sudoku.csprojResolveAssemblyReference.cache
