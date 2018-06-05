@@ -12,8 +12,8 @@ namespace sudoku
         public int bestHeuristic = 1000;
         private int foundSame = 0, iterations = 0;
         public int neighboursSearched = 0;
-
-        public HillClimber(Sudoku puzzle, int s, int randomWalks)
+        
+        public HillClimber(Sudoku puzzle)
         {
             this.puzzle = puzzle;
         }

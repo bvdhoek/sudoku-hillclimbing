@@ -8,8 +8,8 @@ namespace sudoku {
     class Sudoku {
         public int totalHeuristic;
         int[] rowHeuristic, columnHeuristic;
-        public int[,] puzzle;       //(Row, Column) based
-        public bool[,] swappable; //(Block, Elem) based
+        public int[,] puzzle;
+        public bool[,] swappable;
         public bool isLocalOptimum = false;
         private Random random = new Random();
 
@@ -25,12 +25,13 @@ namespace sudoku {
 
         private void ReadPuzzle()
         {
+            Console.WriteLine(Console.ReadLine());
             for (int i = 0; i < 9; i++)
             {
-                string[] numbers = Console.ReadLine().Split();
+                string numbers = Console.ReadLine();
                 for (int j = 0; j < 9; j++)
                 {
-                    int number = int.Parse(numbers[j]);
+                    int number = numbers[j] - '0';
                     swappable[i, j] = number == 0;
                     puzzle[i, j] = number;
                 }
@@ -228,8 +229,9 @@ namespace sudoku {
                     {
                         Console.ForegroundColor = ConsoleColor.Magenta;
                     }
-                    Console.Write(puzzle[i, j] + space);
+                    Console.Write(puzzle[i, j]);
                     Console.ForegroundColor = ConsoleColor.Gray;
+                    Console.Write(space);
                 }
                 Console.Write("\r\n");
                 if ((i + 1) % 3 == 0 && i != 8)
