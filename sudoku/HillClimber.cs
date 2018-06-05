@@ -10,36 +10,33 @@ namespace sudoku
     {
         public Sudoku puzzle;
         public int bestHeuristic = 1000;
-        private int foundSame = 0;
+        private int foundSame = 0, iterations = 0;
         public int neighboursSearched = 0;
 
-        public HillClimber(Sudoku puzzle)
+        public HillClimber(Sudoku puzzle, int s, int randomWalks)
         {
             this.puzzle = puzzle;
         }
 
-        public void Climb()
+        public bool Climb()
         {
-            puzzle.isLocalOptimum = false;
-            Sudoku bestSolution = puzzle;
-            int bestHeuristic = puzzle.HeuristicValue();
-            puzzle.RandomWalk(1);
-            while (!puzzle.InLocalOptimum())
+            foundSame = 0;
+            iterations++;
+            while (!puzzle.isLocalOptimum || foundSame <= 50)
             {
-                bestSolution = puzzle.BestNeighbour();
+                int h = puzzle.totalHeuristic;
+                puzzle.BestNeighbour();
                 neighboursSearched++;
-                puzzle = bestSolution;
+                if (h == puzzle.totalHeuristic)
+                    foundSame++;
+                else
+                {
+                    foundSame = 0;
+                }
+                if (puzzle.totalHeuristic == 0) return true;
             }
-            if (puzzle.HeuristicValue() == this.bestHeuristic)
-            {
-                foundSame++;
-                Console.Write("\r" + this.bestHeuristic + ": " + this.foundSame.ToString("D5") + " ");
-            } else if (puzzle.HeuristicValue() < this.bestHeuristic)
-            {
-                this.bestHeuristic = puzzle.HeuristicValue();
-                foundSame = 0;
-                Console.Write("\r" + this.bestHeuristic + ": " + this.foundSame.ToString("D5") + " ");
-            }
+            puzzle.RandomWalk(2);
+            return false;
         }
     }
 }

@@ -6,148 +6,189 @@ using System.Threading.Tasks;
 
 namespace sudoku {
     class Sudoku {
-        int totalHeuristic;
+        public int totalHeuristic;
         int[] rowHeuristic, columnHeuristic;
         public int[,] puzzle;       //(Row, Column) based
-        public bool[,] unswappable; //(Block, Elem) based
-        private int n, blockSize;
+        public bool[,] swappable; //(Block, Elem) based
         public bool isLocalOptimum = false;
         private Random random = new Random();
 
-        public Sudoku(int n) {
-            this.n = n;
-            rowHeuristic = new int[n];
-            columnHeuristic = new int[n];
-            puzzle = new int[n, n];
-            unswappable = new bool[n, n];
-            blockSize = (int)Math.Sqrt(n);
+        public Sudoku() {
+            rowHeuristic = new int[9];
+            columnHeuristic = new int[9];
+            puzzle = new int[9, 9];
+            swappable = new bool[9, 9];
+            ReadPuzzle();
+            FillRandom();
+            CalculateHeuristic();
         }
 
-        public Sudoku Copy() {
-            Sudoku copy = new Sudoku(n);
-            copy.totalHeuristic = totalHeuristic;
-            copy.rowHeuristic = rowHeuristic.Clone() as int[];
-            copy.columnHeuristic = columnHeuristic.Clone() as int[];
-            copy.puzzle = puzzle.Clone() as int[,];
-            copy.unswappable = unswappable.Clone() as bool[,];
-            return copy;
+        private void ReadPuzzle()
+        {
+            for (int i = 0; i < 9; i++)
+            {
+                string[] numbers = Console.ReadLine().Split();
+                for (int j = 0; j < 9; j++)
+                {
+                    int number = int.Parse(numbers[j]);
+                    swappable[i, j] = number == 0;
+                    puzzle[i, j] = number;
+                }
+            }
         }
 
-        public Sudoku BestNeighbour() {
-            int block = random.Next(n);
-            int bestHeuristic = this.totalHeuristic;
+        public void BestNeighbour() {
+            int blockNumber = random.Next(9);
+            List<Swap> swaps = AllSwaps(blockNumber);
             Swap bestSwap = null;
-            for (int elem1 = 1; elem1 < n; elem1++) {
-                if (!unswappable[block, elem1]) {
-                    for (int elem2 = 0; elem2 < elem1; elem2++) {
-                        if (!unswappable[block, elem2]) {
-                            Swap(block, elem1, elem2);
-                            if (this.totalHeuristic < bestHeuristic) bestSwap = new Swap(elem1, elem2);
-                            Swap(block, elem1, elem2);
+            int currentHeuristic = totalHeuristic;
+            int bestHeuristicFound = 1000;
+            foreach (Swap s in swaps)
+            {
+                Swap(s);
+                if (totalHeuristic <= currentHeuristic && totalHeuristic <= bestHeuristicFound)
+                {
+                    bestSwap = s;
+                    bestHeuristicFound = totalHeuristic;
+                }
+                Swap(s);
+            }
+            if (bestSwap != null)
+            {
+                isLocalOptimum = false;
+                Swap(bestSwap);
+            } else
+            {
+                isLocalOptimum = true;
+            }
+            
+        }
+
+        private List<Swap> AllSwaps(int blockNumber)
+        {
+            List<Swap> swaps = new List<Swap>();
+            int xMin = 3 * (blockNumber % 3);
+            int yMin = 3 * (blockNumber / 3);
+
+            for (int y1 = yMin; y1 <= yMin + 2; y1++)
+            {
+                for (int x1 = xMin; x1 <= xMin + 2; x1++)
+                {
+                    for (int y2 = yMin; y2 <= yMin + 2; y2++)
+                    {
+                        for (int x2 = xMin; x2 <= xMin + 2; x2++)
+                        {
+                            if (((x2 > x1 && y2 >= y1) || y2 > y1) && swappable[x1, y1] && swappable[x2, y2])
+                                swaps.Add(new Swap(x1, y1, x2, y2));
                         }
                     }
                 }
             }
-            if (bestSwap == null)
-            {
-                isLocalOptimum = true;
-                return this;
-            } else
-            {
-                Swap(block, bestSwap.elem1, bestSwap.elem2);
-                return Copy();
-            }
-        }
-
-        public bool InLocalOptimum()
-        {
-            return this.isLocalOptimum;
-        }
-
-        public int HeuristicValue() {
-            return totalHeuristic;
+            return swaps;
         }
 
         public void RandomWalk(int iterations)
         {
+            int x1, y1, x2, y2;
             for (int i = 0; i < iterations; i++) {
-                int j = random.Next(n);
-                Swap(random.Next(n), j, (random.Next(n - 1) + 1 + j) % n);
+                do
+                {
+                    x1 = random.Next(9);
+                    y1 = random.Next(9);
+                } while (!swappable[x1, y1]);
+                do
+                {
+                    x2 = (x1 / 3) * 3 + random.Next(3);
+                    y2 = (y1 / 3) * 3 + random.Next(3);
+                } while (!swappable[x2, y2] || (x2 == x1 && y2 == y1));
+                Swap(new Swap(x1, y1, x2, y2));
             }
         }
 
-        private void Swap(int block, int elem1, int elem2) {
-            int i1 = blockSize * (block / blockSize) + (elem1 / blockSize);
-            int j1 = blockSize * (block % blockSize) + (elem1 % blockSize);
-            int i2 = blockSize * (block / blockSize) + (elem2 / blockSize);
-            int j2 = blockSize * (block % blockSize) + (elem2 % blockSize);
+        public void Swap(Swap s)
+        {
+            int temp = puzzle[s.x1, s.y1];
+            puzzle[s.x1, s.y1] = puzzle[s.x2, s.y2];
+            puzzle[s.x2, s.y2] = temp;
+            UpdateHeuristic(s);
+        }
 
-            int first = puzzle[i1, j1];
-            puzzle[i1, j1] = puzzle[i2, j2];
-            puzzle[i2, j2] = first;
-            
-            List<int> missing;
-            if (i1 != i2) {
-                missing = Enumerable.Range(1, n).ToList();
-                for (int x = 0; x < n; x++) {
-                    if (missing.Contains(puzzle[i1, x])) {
-                        missing.Remove(puzzle[i1, x]);
-                    }
-                }
-                totalHeuristic += missing.Count - rowHeuristic[i1];
-                rowHeuristic[i1] = missing.Count;
+        private void UpdateHeuristic(Swap s)
+        {
+            UpdateColumnHeuristic(s.x1);
+            UpdateColumnHeuristic(s.x2);
+            UpdateRowHeuristic(s.y1);
+            UpdateRowHeuristic(s.y2);
+        }
 
-                missing = Enumerable.Range(1, n).ToList();
-                for (int x = 0; x < n; x++) {
-                    if (missing.Contains(puzzle[i2, x])) {
-                        missing.Remove(puzzle[i2, x]);
-                    }
+        private void UpdateColumnHeuristic(int column)
+        {
+            UInt16 values = 0;
+            int heuristic = 0;
+            for (int i = 0; i < 9; i++)
+            {
+                if (values == (values | 1 << puzzle[column, i]))
+                {
+                    heuristic++;
                 }
-                totalHeuristic += missing.Count - rowHeuristic[i2];
-                rowHeuristic[i2] = missing.Count;
+                else
+                {
+                    values = (UInt16)(values | (1 << puzzle[column, i]));
+                }
             }
-            if (j1 != j2) {
-                missing = Enumerable.Range(1, n).ToList();
-                for (int x = 0; x < n; x++) {
-                    if (missing.Contains(puzzle[x, j1])) {
-                        missing.Remove(puzzle[x, j1]);
-                    }
-                }
-                totalHeuristic += missing.Count - columnHeuristic[j1];
-                columnHeuristic[j1] = missing.Count;
+            totalHeuristic += heuristic - columnHeuristic[column];
+            columnHeuristic[column] = heuristic;
+        }
 
-                missing = Enumerable.Range(1, n).ToList();
-                for (int x = 0; x < n; x++) {
-                    if (missing.Contains(puzzle[x, j2])) {
-                        missing.Remove(puzzle[x, j2]);
-                    }
+        private void UpdateRowHeuristic(int row)
+        {
+            UInt16 values = 0;
+            int heuristic = 0;
+            for (int i = 0; i < 9; i++)
+            {
+                if (values == (values | 1 << puzzle[i, row]))
+                {
+                    heuristic++;
                 }
-                totalHeuristic += missing.Count - columnHeuristic[j2];
-                columnHeuristic[j2] = missing.Count;
+                else
+                {
+                    values = (UInt16)(values | (1 << puzzle[i, row]));
+                }
             }
+            totalHeuristic += heuristic - rowHeuristic[row];
+            rowHeuristic[row] = heuristic;
+        }
+
+        private void CalculateHeuristic()
+        {
+            for (int j = 0; j < 9; j++)
+            {
+                UpdateColumnHeuristic(j);
+                UpdateRowHeuristic(j);
+            }
+            totalHeuristic = rowHeuristic.Sum(x => x) + columnHeuristic.Sum(x => x);
         }
 
         public void FillRandom() {
             int i, j;
-            List<int>[] rowContains = new List<int>[n];
-            List<int>[] columnContains = new List<int>[n];
-            for (i = 0; i < n; i++) {
+            List<int>[] rowContains = new List<int>[9];
+            List<int>[] columnContains = new List<int>[9];
+            for (i = 0; i < 9; i++) {
                 rowContains[i] = new List<int>();
                 columnContains[i] = new List<int>();
             }
-            for (int block = 0; block < n; block++) {
-                List<int> missing = Enumerable.Range(1, n).ToList();
-                for (int elem = 0; elem < n; elem++) {
-                    i = blockSize * (block / blockSize) + (elem / blockSize);
-                    j = blockSize * (block % blockSize) + (elem % blockSize);
+            for (int block = 0; block < 9; block++) {
+                List<int> missing = Enumerable.Range(1, 9).ToList();
+                for (int elem = 0; elem < 9; elem++) {
+                    i = 3 * (block / 3) + (elem / 3);
+                    j = 3 * (block % 3) + (elem % 3);
                     if (puzzle[i, j] != 0) {
-                        unswappable[block, elem] = true;
                         missing.Remove(puzzle[i, j]);
                     }
                 }
-                for (int elem = 0; elem < n; elem++) {
-                    i = blockSize * (block / blockSize) + (elem / blockSize);
-                    j = blockSize * (block % blockSize) + (elem % blockSize);
+                for (int elem = 0; elem < 9; elem++) {
+                    i = 3 * (block / 3) + (elem / 3);
+                    j = 3 * (block % 3) + (elem % 3);
                     if (puzzle[i, j] == 0) {
                         int r = missing[random.Next(missing.Count)];
                         puzzle[i, j] = r;
@@ -171,11 +212,11 @@ namespace sudoku {
         public void Print() {
             Console.WriteLine(this.totalHeuristic);
             String space = " ";
-            for (int i = 0; i < n; i++)
+            for (int i = 0; i < 9; i++)
             {
-                for (int j = 0; j < n; j++)
+                for (int j = 0; j < 9; j++)
                 {
-                    if ((j + 1) % blockSize == 0 && j != n - 1)
+                    if ((j + 1) % 3 == 0 && j != 8)
                     {
                         space = "|";
                     }
@@ -183,16 +224,21 @@ namespace sudoku {
                     {
                         space = " ";
                     }
+                    if (!swappable[i, j])
+                    {
+                        Console.ForegroundColor = ConsoleColor.Magenta;
+                    }
                     Console.Write(puzzle[i, j] + space);
+                    Console.ForegroundColor = ConsoleColor.Gray;
                 }
                 Console.Write("\r\n");
-                if ((i + 1) % blockSize == 0 && i != n - 1)
+                if ((i + 1) % 3 == 0 && i != 8)
                 {
-                    for (int j = 1; j < blockSize; ++j)
+                    for (int j = 1; j < 3; ++j)
                     {
-                        Console.Write(new string('-', 2 * blockSize - 1) + "+");
+                        Console.Write(new string('-', 2 * 3 - 1) + "+");
                     }
-                    Console.Write(new string('-', 2 * blockSize - 1) + "\n");
+                    Console.Write(new string('-', 2 * 3 - 1) + "\n");
                 }
             }
         }
