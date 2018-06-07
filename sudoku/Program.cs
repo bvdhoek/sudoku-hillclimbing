@@ -13,7 +13,6 @@ namespace sudoku {
                     foundSolution = climber.Climb();
                 }
                 Console.WriteLine("Calculated solution");
-
                 climber.puzzle.Print();
             }
         }

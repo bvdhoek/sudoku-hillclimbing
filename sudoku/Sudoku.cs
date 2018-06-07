@@ -23,13 +23,10 @@ namespace sudoku {
             CalculateHeuristic();
         }
 
-        private void ReadPuzzle()
-        {
-            for (int i = 0; i < 9; i++)
-            {
+        private void ReadPuzzle() {
+            for (int i = 0; i < 9; i++) {
                 string numbers = Console.ReadLine();
-                for (int j = 0; j < 9; j++)
-                {
+                for (int j = 0; j < 9; j++) {
                     int number = numbers[j] - '0';
                     swappable[i, j] = number == 0;
                     puzzle[i, j] = number;
@@ -43,41 +40,32 @@ namespace sudoku {
             Swap bestSwap = null;
             int currentHeuristic = totalHeuristic;
             int bestHeuristicFound = 1000;
-            foreach (Swap s in swaps)
-            {
+            foreach (Swap s in swaps) {
                 Swap(s);
-                if (totalHeuristic <= currentHeuristic && totalHeuristic <= bestHeuristicFound)
-                {
+                if (totalHeuristic <= currentHeuristic && totalHeuristic <= bestHeuristicFound) {
                     bestSwap = s;
                     bestHeuristicFound = totalHeuristic;
                 }
                 Swap(s);
             }
-            if (bestSwap != null)
-            {
+            if (bestSwap != null) {
                 isLocalOptimum = false;
                 Swap(bestSwap);
-            } else
-            {
+            } else {
                 isLocalOptimum = true;
             }
-            
+
         }
 
-        private List<Swap> AllSwaps(int blockNumber)
-        {
+        private List<Swap> AllSwaps(int blockNumber) {
             List<Swap> swaps = new List<Swap>();
             int xMin = 3 * (blockNumber % 3);
             int yMin = 3 * (blockNumber / 3);
 
-            for (int y1 = yMin; y1 <= yMin + 2; y1++)
-            {
-                for (int x1 = xMin; x1 <= xMin + 2; x1++)
-                {
-                    for (int y2 = yMin; y2 <= yMin + 2; y2++)
-                    {
-                        for (int x2 = xMin; x2 <= xMin + 2; x2++)
-                        {
+            for (int y1 = yMin; y1 <= yMin + 2; y1++) {
+                for (int x1 = xMin; x1 <= xMin + 2; x1++) {
+                    for (int y2 = yMin; y2 <= yMin + 2; y2++) {
+                        for (int x2 = xMin; x2 <= xMin + 2; x2++) {
                             if (((x2 > x1 && y2 >= y1) || y2 > y1) && swappable[x1, y1] && swappable[x2, y2])
                                 swaps.Add(new Swap(x1, y1, x2, y2));
                         }
@@ -87,17 +75,14 @@ namespace sudoku {
             return swaps;
         }
 
-        public void RandomWalk(int iterations)
-        {
+        public void RandomWalk(int iterations) {
             int x1, y1, x2, y2;
             for (int i = 0; i < iterations; i++) {
-                do
-                {
+                do {
                     x1 = random.Next(9);
                     y1 = random.Next(9);
                 } while (!swappable[x1, y1]);
-                do
-                {
+                do {
                     x2 = (x1 / 3) * 3 + random.Next(3);
                     y2 = (y1 / 3) * 3 + random.Next(3);
                 } while (!swappable[x2, y2] || (x2 == x1 && y2 == y1));
@@ -105,34 +90,27 @@ namespace sudoku {
             }
         }
 
-        public void Swap(Swap s)
-        {
+        public void Swap(Swap s) {
             int temp = puzzle[s.x1, s.y1];
             puzzle[s.x1, s.y1] = puzzle[s.x2, s.y2];
             puzzle[s.x2, s.y2] = temp;
             UpdateHeuristic(s);
         }
 
-        private void UpdateHeuristic(Swap s)
-        {
+        private void UpdateHeuristic(Swap s) {
             UpdateColumnHeuristic(s.x1);
             UpdateColumnHeuristic(s.x2);
             UpdateRowHeuristic(s.y1);
             UpdateRowHeuristic(s.y2);
         }
 
-        private void UpdateColumnHeuristic(int column)
-        {
+        private void UpdateColumnHeuristic(int column) {
             UInt16 values = 0;
             int heuristic = 0;
-            for (int i = 0; i < 9; i++)
-            {
-                if (values == (values | 1 << puzzle[column, i]))
-                {
+            for (int i = 0; i < 9; i++) {
+                if (values == (values | 1 << puzzle[column, i])) {
                     heuristic++;
-                }
-                else
-                {
+                } else {
                     values = (UInt16)(values | (1 << puzzle[column, i]));
                 }
             }
@@ -140,18 +118,13 @@ namespace sudoku {
             columnHeuristic[column] = heuristic;
         }
 
-        private void UpdateRowHeuristic(int row)
-        {
+        private void UpdateRowHeuristic(int row) {
             UInt16 values = 0;
             int heuristic = 0;
-            for (int i = 0; i < 9; i++)
-            {
-                if (values == (values | 1 << puzzle[i, row]))
-                {
+            for (int i = 0; i < 9; i++) {
+                if (values == (values | 1 << puzzle[i, row])) {
                     heuristic++;
-                }
-                else
-                {
+                } else {
                     values = (UInt16)(values | (1 << puzzle[i, row]));
                 }
             }
@@ -159,10 +132,8 @@ namespace sudoku {
             rowHeuristic[row] = heuristic;
         }
 
-        private void CalculateHeuristic()
-        {
-            for (int j = 0; j < 9; j++)
-            {
+        private void CalculateHeuristic() {
+            for (int j = 0; j < 9; j++) {
                 UpdateColumnHeuristic(j);
                 UpdateRowHeuristic(j);
             }
@@ -212,34 +183,23 @@ namespace sudoku {
         public void Print() {
             Console.WriteLine(this.totalHeuristic);
             String space = " ";
-            for (int i = 0; i < 9; i++)
-            {
-                for (int j = 0; j < 9; j++)
-                {
-                    if ((j + 1) % 3 == 0 && j != 8)
-                    {
+            for (int i = 0; i < 9; i++) {
+                for (int j = 0; j < 9; j++) {
+                    if (j == 2 || j == 5) {
                         space = "|";
-                    }
-                    else
-                    {
+                    } else {
                         space = " ";
                     }
-                    if (!swappable[i, j])
-                    {
-                        Console.ForegroundColor = ConsoleColor.Magenta;
+                    if (!swappable[i, j]) {
+                        Console.ForegroundColor = ConsoleColor.Green;
                     }
                     Console.Write(puzzle[i, j]);
                     Console.ForegroundColor = ConsoleColor.Gray;
                     Console.Write(space);
                 }
                 Console.Write("\r\n");
-                if ((i + 1) % 3 == 0 && i != 8)
-                {
-                    for (int j = 1; j < 3; ++j)
-                    {
-                        Console.Write(new string('-', 2 * 3 - 1) + "+");
-                    }
-                    Console.Write(new string('-', 2 * 3 - 1) + "\n");
+                if (i == 2 || i == 5) {
+                    Console.WriteLine("-----+-----+-----");
                 }
             }
         }
