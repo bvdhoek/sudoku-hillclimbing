@@ -25,7 +25,6 @@ namespace sudoku {
 
         private void ReadPuzzle()
         {
-            Console.WriteLine(Console.ReadLine());
             for (int i = 0; i < 9; i++)
             {
                 string numbers = Console.ReadLine();

@@ -4,7 +4,7 @@ using sudoku;
 namespace sudoku {
     class Program {
         static void Main(string[] args) {
-            for (int i = 0; i < 10; i++) {
+            while (Console.ReadLine() != "") {
                 Sudoku sudoku = new Sudoku();
                 HillClimber climber = new HillClimber(sudoku);
                 Console.WriteLine("Calculating solution");
@@ -16,7 +16,6 @@ namespace sudoku {
 
                 climber.puzzle.Print();
             }
-            Console.ReadLine();
         }
     }
 }
