@@ -10,15 +10,18 @@ namespace sudoku {
         public int bestHeuristic = 1000;
         private int foundSame = 0, iterations = 0;
         public int neighboursSearched = 0;
+        private int s, n;
 
-        public HillClimber(Sudoku puzzle) {
+        public HillClimber(Sudoku puzzle, int s, int n) {
             this.puzzle = puzzle;
+            this.s = s;
+            this.n = n;
         }
 
         public bool Climb() {
             foundSame = 0;
             iterations++;
-            while (!puzzle.isLocalOptimum || foundSame <= 50) {
+            while (!puzzle.isLocalOptimum || foundSame <= n) {
                 int h = puzzle.totalHeuristic;
                 puzzle.BestNeighbour();
                 neighboursSearched++;
@@ -30,7 +33,7 @@ namespace sudoku {
                 if (puzzle.totalHeuristic == 0)
                     return true;
             }
-            puzzle.RandomWalk(2);
+            puzzle.RandomWalk(s);
             return false;
         }
     }
